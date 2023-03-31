@@ -10,4 +10,14 @@ In addition to image processing, CNNs are also used in natural language processi
 
 #Explanation Of Code
 ## İMPORT SECTİON 
-### To Run Code , you need to 
+---To Run Code , you need to install the requirement libraries ---> For example : pip install tensorflow (on cmd)
+---After setting up the env. (requirement libraries) , you need to import the libraries that we installed 
+----Example Usage
+import tensorflow as tf 
+import numpy as np
+
+
+*labels* , *folder_name* , *sample_number* these are important parameter for this algorithm 
+*labels* = "walking" , "fall"
+ *sample_number* = "300"
+

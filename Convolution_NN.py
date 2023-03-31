@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore")
 
-labels = ["walking","fall"] #labels (ex => labels = ["loc1","loc2"])
+labels = ["walking","fall"] #labels (ex => labels = ["sleeping","sitting"])
 folder_name = "path/to/file" #directory of the data (ex => folder_name = "data/fall-walking")
 sample_number = 1600 #sample number (ex => sample_number = 480)
 
