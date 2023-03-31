@@ -37,9 +37,8 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 
 labels = ["walking","fall"] #labels (ex => labels = ["loc1","loc2"])
-folder_name = "C:\\Users\Berk\Desktop\Tiga\Data\_All_data" #directory of the data (ex => folder_name = "data/loc1-loc2")
+folder_name = "path/to/file" #directory of the data (ex => folder_name = "data/fall-walking")
 sample_number = 1600 #sample number (ex => sample_number = 480)
-
 
 def get_data(path, labels):
 #def get_data(file_list, labels):
@@ -380,7 +379,7 @@ model.compile(optimizer=opt,
           metrics=['acc',f1_m])
 
 # checkpoint
-filepath="checkpoints/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+filepath="checkpoints/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"## path of your model
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 
@@ -411,6 +410,8 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+
+
 
 
 
