@@ -69,21 +69,17 @@ def get_data(path, labels):
 ###__Above cod___ It explains the reading protocol that includes codebooks from the past. For more information you can check DatasetReader.py file.
 
 #LOAD SECTİON
-### amp1,amp2,phase1,phase2,y=fixed_data_read_twostation(folder_name,sample_number,labels,True) (LOAD SECTİON)
+### amp1,amp2,phase1,phase2,y=fixed_data_read_twostation(folder_name,sample_number,labels,True)
 
 amp1,amp2,y=get_data(folder_name,labels)
 
 
-## #  Once read the data save it as np.array so no need to read each time 
+### Once read the data save it as np.array so no need to read each time 
 np.save('amp1',amp1)
 np.save('amp2',amp2)
-# np.save('phase1',phase1)
-# np.save('phase2',phase2)
 np.save('y',y)
-
 y = np.load('y.npy')
 amp1 = np.load('amp1.npy')
 amp2 = np.load('amp2.npy')
-# phase1 = np.load('phase1.npy')
-# phase2 = np.load('phase1.npy')
+
 
