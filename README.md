@@ -83,3 +83,31 @@ amp1 = np.load('amp1.npy')
 amp2 = np.load('amp2.npy')
 
 
+# PARAMETERS AND SEGMENTATİON
+## "win_size" and "step_size" are significant parameters on model , Also amp_segmented is function that take some parameters came from "win_size"and "step_Size".
+winSize = 256
+step_size = 128
+
+i=0
+amp_segmented=[]
+y_segmented=[]
+class_counter=0
+for data in amp1:
+    y_class=y[class_counter]
+    mod_range=len(data)%winSize
+    timelength=len(data)-mod_range
+    for i in range(0,timelength-step_size,step_size):
+        start=i
+        end=i+winSize
+        # print("Start:",i," End:",i+winSize)
+        add_temp_data=data[i:end,:]
+        amp_segmented.append(add_temp_data)
+        y_segmented.append(y_class)
+    class_counter=class_counter+1    
+    
+    
+amp_segmented=np.asarray(amp_segmented)
+y_segmented=np.asarray(y_segmented)
+train_data=amp_segmented.copy()
+train_labels=y_segmented.copy()
+train_labels=train_labels.reshape((-1,1))
