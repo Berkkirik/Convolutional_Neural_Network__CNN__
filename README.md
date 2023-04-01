@@ -68,7 +68,7 @@ def get_data(path, labels):
     return np.array(d_train1), np.array(d_train2), np.array(d_trainy)
 ###__Above cod___ It explains the reading protocol that includes codebooks from the past. For more information you can check DatasetReader.py file.
 
-#LOAD SECTİON
+# LOAD SECTİON
 ### amp1,amp2,phase1,phase2,y=fixed_data_read_twostation(folder_name,sample_number,labels,True)
 
 amp1,amp2,y=get_data(folder_name,labels)
