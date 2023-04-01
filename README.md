@@ -19,7 +19,7 @@ __[Find, install and publish Python packages with the Python Package Index]__ (h
 import tensorflow as tf 
 import numpy as np
 
-##GET_DATA
+# get_Data
 *labels* , *folder_name* , *sample_number* these are important parameter for this algorithm 
 *labels* = "walking" , "fall"
 *sample_number* = "300"
