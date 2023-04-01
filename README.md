@@ -66,5 +66,5 @@ def get_data(path, labels):
                 continue
             
     return np.array(d_train1), np.array(d_train2), np.array(d_trainy)
-    __Above cod___ It explains the reading protocol that includes codebooks from the past. For more information you can check DatasetReader.py file.
+###__Above cod___ It explains the reading protocol that includes codebooks from the past. For more information you can check DatasetReader.py file.
 
