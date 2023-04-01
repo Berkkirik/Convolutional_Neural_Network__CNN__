@@ -12,11 +12,14 @@ In addition to image processing, CNNs are also used in natural language processi
 ## İMPORT SECTİON 
 ---To Run Code , you need to install the requirement libraries ---> For example : pip install tensorflow (on cmd)
 ---After setting up the env. (requirement libraries) , you need to import the libraries that we installed 
-----Example Usage
+__[Find, install and publish Python packages with the Python Package Index]__ (https://pypi.org/)
+
+
+----Example Usage 
 import tensorflow as tf 
 import numpy as np
 
-
+##GET_DATA
 *labels* , *folder_name* , *sample_number* these are important parameter for this algorithm 
 *labels* = "walking" , "fall"
 *sample_number* = "300"
@@ -63,4 +66,5 @@ def get_data(path, labels):
                 continue
             
     return np.array(d_train1), np.array(d_train2), np.array(d_trainy)
-    
+    __Above cod___ It explains the reading protocol that includes codebooks from the past. For more information you can check DatasetReader.py file.
+
