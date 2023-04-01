@@ -19,5 +19,48 @@ import numpy as np
 
 *labels* , *folder_name* , *sample_number* these are important parameter for this algorithm 
 *labels* = "walking" , "fall"
- *sample_number* = "300"
+*sample_number* = "300"
+*folder name* = path/to/file
 
+def get_data(path, labels):
+#def get_data(file_list, labels):
+    file_list = os.listdir(path)
+    labels = labels
+    d_train1=[]
+    d_train2 = []
+    d_trainy=[]
+    drops = [0,1,2,3,4,5,32,59,60,61,62,63]
+    sample_number = 300
+    
+    for f in file_list:
+        tokens = f.split("_")
+        train_data=None
+        #print(tokens)
+        if tokens[3]=="STA1":
+            try:
+                with open(path +"/"+f, 'rb') as f:
+                      train_data=np.load(f)
+                      
+                drops = [0,1,2,3,4,5,32,59,60,61,62,63]
+                train_data=np.delete(train_data,drops,1)
+                if train_data.shape[0]==sample_number:
+                    d_trainy.append(labels.index(tokens[0]))
+                d_train1.append(train_data)
+            except ValueError:
+                print(f"{f} has 0 size")
+                continue
+        if tokens[3] =="STA2":
+            try:
+                with open(path +"/"+f, 'rb') as f:
+                      train_data=np.load(f)  
+                drops = [0,1,2,3,4,5,32,59,60,61,62,63]
+                train_data=np.delete(train_data,drops,1)
+                # if train_data.shape[0]==sample_number:
+                #     d_trainy.append(labels.index(tokens[0]))
+                d_train2.append(train_data)
+            except ValueError:
+                print(f"{f} has 0 size")
+                continue
+            
+    return np.array(d_train1), np.array(d_train2), np.array(d_trainy)
+    
