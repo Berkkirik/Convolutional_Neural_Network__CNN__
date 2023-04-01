@@ -105,7 +105,7 @@ for data in amp1:
         start=i
         end=i+winSize
         
-        
+
         add_temp_data=data[i:end,:]
         amp_segmented.append(add_temp_data)
         y_segmented.append(y_class)
@@ -120,3 +120,31 @@ train_labels=train_labels.reshape((-1,1))
 
 
 # Convert y to Categorial
+
+enc = OneHotEncoder(handle_unknown='ignore', sparse=False)
+
+enc = enc.fit(train_labels)
+
+train_labels = enc.transform(train_labels)
+
+
+# BUTTERWORTH FILTER
+## You can reach butterworth filter documentation from **https://en.wikipedia.org/wiki/Butterworth_filter**
+order = 5
+cutoff_freq = 20
+freq=100
+time = np.linspace(0,1, 256, endpoint=False)
+normalized_cutoff_freq = 2 * cutoff_freq / freq
+numerator_coeffs, denominator_coeffs = signal.butter(order, normalized_cutoff_freq)
+
+butter_filtered_data=[]
+for data in train_data.copy():
+    for i in range(data.shape[1]):
+        # print(i)
+        sample_signal=data[:,i]
+        filtered_signal = signal.lfilter(numerator_coeffs, denominator_coeffs, sample_signal)
+        #filtered_signal=filtered_signal.reshape((len(filtered_signal),1))
+        data[:,i]=filtered_signal
+    butter_filtered_data.append(data)
+butter_filtered_data=np.asarray(butter_filtered_data)
+
