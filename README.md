@@ -176,10 +176,9 @@ x_train=low_pass_filter(train_data,5,100,20)
 
 # STEP 3 DATA SPLIT
 
-x_train, x_test, y_train, y_test = train_test_split(train_data, train_labels, test_size = 0.2)
+    x_train, x_test, y_train, y_test = train_test_split(train_data, train_labels, test_size = 0.2)
 
-#
-Split data for testing on the data that we get the system (_All_data)
+# Split data for testing on the data that we get the system (_All_data)
 
 
 # STEP 4 CREATE MODEL
