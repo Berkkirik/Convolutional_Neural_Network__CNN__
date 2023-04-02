@@ -211,7 +211,7 @@ class DS_Conv(tf.keras.layers.Layer):
         })
         return config
     
-## self,input_tensor functions created
+## self,input_tensor objects created
     def call(self, input_tensor):
         x = self.depthwise(input_tensor)
         n1 = self.normalization1(x)
@@ -219,3 +219,203 @@ class DS_Conv(tf.keras.layers.Layer):
         p = self.pointwise(a1)
         n2 = self.normalization2(p)
         return self.activation2(n2)
+
+class FeatureAttention(tf.keras.layers.Layer):
+    
+    def __init__(self,filters,pool_size,kernel_size,activation):
+        super(FeatureAttention,self).__init__()
+        self.concatenate = Concatenate()
+        self.multiply = Multiply()
+        self.max_pooling = MaxPooling2D(pool_size=pool_size,strides=(1,1),padding='same')
+        self.avg_pooling = AveragePooling2D(pool_size=pool_size,strides=(1,1),padding='same')
+        self.conv2d = Conv2D(filters=filters,kernel_size=kernel_size,activation=activation, strides=1,padding='same')
+        
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            "concatenate": self.concatenate,
+            "multiply": self.multiply,
+            "max_pooling": self.max_pooling,
+            "avg_pooling": self.avg_pooling,
+            "2d_convolution": self.conv2d,
+        })
+        return config
+    
+    def call(self, input_tensor):
+        y=input_tensor
+        x = self.concatenate([
+            self.max_pooling(input_tensor),
+            self.avg_pooling(input_tensor)])
+        x = self.conv2d(x)
+        return self.multiply([x,y])
+
+# Class Feature Attention 
+class FeatureAttention(tf.keras.layers.Layer):
+    
+    def __init__(self,filters,pool_size,kernel_size,activation):
+        super(FeatureAttention,self).__init__()
+        self.concatenate = Concatenate()
+        self.multiply = Multiply()
+        self.max_pooling = MaxPooling2D(pool_size=pool_size,strides=(1,1),padding='same')
+        self.avg_pooling = AveragePooling2D(pool_size=pool_size,strides=(1,1),padding='same')
+        self.conv2d = Conv2D(filters=filters,kernel_size=kernel_size,activation=activation, strides=1,padding='same')
+        
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            "concatenate": self.concatenate,
+            "multiply": self.multiply,
+            "max_pooling": self.max_pooling,
+            "avg_pooling": self.avg_pooling,
+            "2d_convolution": self.conv2d,
+        })
+        return config
+    
+    def call(self, input_tensor):
+        y=input_tensor
+        x = self.concatenate([
+            self.max_pooling(input_tensor),
+            self.avg_pooling(input_tensor)])
+        x = self.conv2d(x)
+        return self.multiply([x,y])
+# Class Residual block
+
+
+    
+    def __init__(self,filters,kernel_size):
+        super(ResidualBlock,self).__init__()
+        self.conv2d1= Conv2D(filters=filters,kernel_size=kernel_size,strides=(1,1),padding='same')
+        self.activation1 = LeakyReLU()
+        self.normalization1 = BatchNormalization()
+        self.conv2d2 = Conv2D(filters=filters,kernel_size=kernel_size,strides=(1,1),padding='same')
+        self.activation2 = LeakyReLU()
+        self.normalization2 = BatchNormalization()
+        self.concatenate = Concatenate()
+        
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            "2d_convolution1": self.conv2d1,
+            "2d_convolution2": self.conv2d2,
+            "leaky_relu_activation1": self.activation1,
+            "leaky_relu_activation2": self.activation2,
+            "batch_normalization1": self.normalization1,
+            "batch_normalization2": self.normalization2,
+            "concatenate": self.concatenate,
+            })
+        return config
+   
+    def call(self, input_tensor):
+        y = input_tensor
+        x = self.conv2d1(input_tensor)
+        x = self.normalization1(x)
+        x = self.activation1(x)
+        x = self.conv2d2(x)
+        x = self.normalization2(x)
+        x = self.concatenate([x,y])
+        return self.activation2(x)
+
+
+
+depthwise_separable1 = DS_Conv(filters=32,kernel_size=(3,3),strides=(2,2))
+depthwise_separable2 = DS_Conv(filters=64,kernel_size=(3,3),strides=(2,2))
+depthwise_separable3 = DS_Conv(filters=128,kernel_size=(3,3),strides=(2,2))
+depthwise_separable4 = DS_Conv(filters=256,kernel_size=(3,3),strides=(2,2))
+
+feature_Attention1=FeatureAttention(filters=32,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
+feature_Attention2=FeatureAttention(filters=64,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
+
+residual_block1=ResidualBlock(filters=32,kernel_size=(3,3))
+residual_block2=ResidualBlock(filters=64,kernel_size=(3,3))
+
+model = Sequential()
+
+input_shape = (256,52,1)
+
+model.add(Conv2D(12,  kernel_size=(3,3), input_shape=input_shape, padding='same', strides=1))
+ 
+model.add(BatchNormalization())
+model.add(ReLU())
+model.add(depthwise_separable1)
+model.add(feature_Attention1)
+
+model.add(residual_block1)
+model.add(depthwise_separable2)
+model.add(feature_Attention2)
+
+model.add(residual_block2)
+model.add(depthwise_separable3)
+model.add(depthwise_separable4)
+model.add(GlobalAveragePooling2D())
+model.add(Dropout(rate=0.4))
+model.add(Dense(64))
+model.add(Dense(y_train.shape[1], activation='softmax'))
+
+model.summary()
+plot_model(model, "my_first_model.png")
+
+# Recall Section of model to testing the accuracy 
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
+opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
+
+model.compile(optimizer=opt,
+          loss="categorical_crossentropy",
+          metrics=['acc',f1_m])
+
+# Set the checkpoint 
+filepath="checkpoints/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"## path of your model
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [checkpoint]
+
+
+#variables of CNN
+history = model.fit(
+    x_train, y_train,
+    epochs=100,
+    batch_size=32,
+    validation_split=0.2,
+    shuffle=True,
+    callbacks=callbacks_list
+
+
+# Prediction of data with test size data 
+
+prediction = model.predict(x_train[:300])
+prediction = model.evaluate(x_test,y_test[:])
+
+
+# Plotting the accuracy , test , loss ...
+
+
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+
