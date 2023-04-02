@@ -317,87 +317,87 @@ class FeatureAttention(tf.keras.layers.Layer):
 
 
 
-depthwise_separable1 = DS_Conv(filters=32,kernel_size=(3,3),strides=(2,2))
-depthwise_separable2 = DS_Conv(filters=64,kernel_size=(3,3),strides=(2,2))
-depthwise_separable3 = DS_Conv(filters=128,kernel_size=(3,3),strides=(2,2))
-depthwise_separable4 = DS_Conv(filters=256,kernel_size=(3,3),strides=(2,2))
+    depthwise_separable1 = DS_Conv(filters=32,kernel_size=(3,3),strides=(2,2))
+    depthwise_separable2 = DS_Conv(filters=64,kernel_size=(3,3),strides=(2,2))
+    depthwise_separable3 = DS_Conv(filters=128,kernel_size=(3,3),strides=(2,2))
+    depthwise_separable4 = DS_Conv(filters=256,kernel_size=(3,3),strides=(2,2))
 
-feature_Attention1=FeatureAttention(filters=32,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
-feature_Attention2=FeatureAttention(filters=64,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
+    feature_Attention1=FeatureAttention(filters=32,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
+    feature_Attention2=FeatureAttention(filters=64,pool_size=(3,3),kernel_size=(3,3),activation="sigmoid")
 
-residual_block1=ResidualBlock(filters=32,kernel_size=(3,3))
-residual_block2=ResidualBlock(filters=64,kernel_size=(3,3))
+    residual_block1=ResidualBlock(filters=32,kernel_size=(3,3))
+    residual_block2=ResidualBlock(filters=64,kernel_size=(3,3))
 
-model = Sequential()
+    model = Sequential()
 
-input_shape = (256,52,1)
+    input_shape = (256,52,1)
 
-model.add(Conv2D(12,  kernel_size=(3,3), input_shape=input_shape, padding='same', strides=1))
- 
-model.add(BatchNormalization())
-model.add(ReLU())
-model.add(depthwise_separable1)
-model.add(feature_Attention1)
+    model.add(Conv2D(12,  kernel_size=(3,3), input_shape=input_shape, padding='same', strides=1))
+    
+    model.add(BatchNormalization())
+    model.add(ReLU())
+    model.add(depthwise_separable1)
+    model.add(feature_Attention1)
 
-model.add(residual_block1)
-model.add(depthwise_separable2)
-model.add(feature_Attention2)
+    model.add(residual_block1)
+    model.add(depthwise_separable2)
+    model.add(feature_Attention2)
 
-model.add(residual_block2)
-model.add(depthwise_separable3)
-model.add(depthwise_separable4)
-model.add(GlobalAveragePooling2D())
-model.add(Dropout(rate=0.4))
-model.add(Dense(64))
-model.add(Dense(y_train.shape[1], activation='softmax'))
+    model.add(residual_block2)
+    model.add(depthwise_separable3)
+    model.add(depthwise_separable4)
+    model.add(GlobalAveragePooling2D())
+    model.add(Dropout(rate=0.4))
+    model.add(Dense(64))
+    model.add(Dense(y_train.shape[1], activation='softmax'))
 
-model.summary()
-plot_model(model, "my_first_model.png")
+    model.summary()
+    plot_model(model, "my_first_model.png")
 
 # Recall Section of model to testing the accuracy 
-def recall_m(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
+    def recall_m(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        recall = true_positives / (possible_positives + K.epsilon())
+        return recall
 
-def precision_m(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
+    def precision_m(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precision = true_positives / (predicted_positives + K.epsilon())
+        return precision
 
-def f1_m(y_true, y_pred):
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+    def f1_m(y_true, y_pred):
+        precision = precision_m(y_true, y_pred)
+        recall = recall_m(y_true, y_pred)
+        return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
-opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
+    opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
 
-model.compile(optimizer=opt,
-          loss="categorical_crossentropy",
-          metrics=['acc',f1_m])
+    model.compile(optimizer=opt,
+            loss="categorical_crossentropy",
+            metrics=['acc',f1_m])
 
 # Set the checkpoint 
-filepath="checkpoints/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"## path of your model
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-callbacks_list = [checkpoint]
+    filepath="checkpoints/weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"## path of your model
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    callbacks_list = [checkpoint]
 
 
-#variables of CNN
-history = model.fit(
-    x_train, y_train,
-    epochs=100,
-    batch_size=32,
-    validation_split=0.2,
-    shuffle=True,
-    callbacks=callbacks_list
+    #variables of CNN
+    history = model.fit(
+        x_train, y_train,
+        epochs=100,
+        batch_size=32,
+        validation_split=0.2,
+        shuffle=True,
+        callbacks=callbacks_list
 
 
 # Prediction of data with test size data 
 
-prediction = model.predict(x_train[:300])
-prediction = model.evaluate(x_test,y_test[:])
+    prediction = model.predict(x_train[:300])
+    prediction = model.evaluate(x_test,y_test[:])
 
 
 # Plotting the accuracy , test , loss ...
