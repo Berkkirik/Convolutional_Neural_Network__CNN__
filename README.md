@@ -148,3 +148,74 @@ for data in train_data.copy():
     butter_filtered_data.append(data)
 butter_filtered_data=np.asarray(butter_filtered_data)
 
+# Butterworth Low pass Filtering section
+## You can reach butterworth low pass filter documentation from **https://medium.com/analytics-vidhya/how-to-filter-noise-with-a-low-pass-filter-python-885223e5e9b7 ** ,  **https://stackoverflow.com/questions/25191620/creating-lowpass-filter-in-scipy-understanding-methods-and-units**
+
+
+def  low_pass_filter(train_data,order,freq,cutoff_freq):
+    
+
+    time = np.linspace(0,1, train_data.shape[1], endpoint=False)
+    normalized_cutoff_freq = 2 * cutoff_freq / freq
+    numerator_coeffs, denominator_coeffs = signal.butter(order, normalized_cutoff_freq)
+    butter_filtered_data=[]
+    for data in train_data.copy():
+        for i in range(data.shape[1]):
+            # print(i)
+            sample_signal=data[:,i]
+            filtered_signal = signal.lfilter(numerator_coeffs, denominator_coeffs, sample_signal)
+            #filtered_signal=filtered_signal.reshape((len(filtered_signal),1))
+            data[:,i]=filtered_signal
+        butter_filtered_data.append(data)
+    butter_filtered_data=np.asarray(butter_filtered_data)
+    return butter_filtered_data
+
+x_train=low_pass_filter(train_data,5,100,20)
+
+
+
+# STEP 3 DATA SPLIT
+
+x_train, x_test, y_train, y_test = train_test_split(train_data, train_labels, test_size = 0.2)
+
+#
+Split data for testing on the data that we get the system (_All_data)
+
+
+# STEP 4 CREATE MODEL
+
+
+## For more information (https://www.tensorflow.org/api_docs/python/tf/keras)
+
+
+class DS_Conv(tf.keras.layers.Layer):
+    
+    def __init__(self,filters,kernel_size,strides):
+        super(DS_Conv,self).__init__()
+        self.depthwise = DepthwiseConv2D(kernel_size=kernel_size,strides=strides,padding="same")
+        self.pointwise = Conv2D(filters=filters,kernel_size=(1,1),padding="same")
+        self.activation1 = ReLU()
+        self.activation2 = ReLU()
+        self.normalization1 = BatchNormalization()
+        self.normalization2 = BatchNormalization()
+        
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            "depthwise_convolution": self.depthwise,
+            "pointwise_convolution": self.pointwise,
+            "relu_activation1": self.activation1,
+            "relu_activation2": self.activation2,
+            "batch_normalization1": self.normalization1,
+            "batch_normalization2": self.normalization2,
+        })
+        return config
+    
+## self,input_tensor functions created
+    def call(self, input_tensor):
+        x = self.depthwise(input_tensor)
+        n1 = self.normalization1(x)
+        a1 = self.activation1(n1)
+        p = self.pointwise(a1)
+        n2 = self.normalization2(p)
+        return self.activation2(n2)
