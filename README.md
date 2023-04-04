@@ -1,3 +1,9 @@
+For any question , Please do not hesitate to text me via mail
+
+My Contact mail adresses : berkkirik.1999@gmail.com            or berk.kirik@outlook.com
+
+
+
 # Convolutional_Neural_Network__CNN__
  Deep Learning Algorithm with Dataset_Reader and Datasets 
 
