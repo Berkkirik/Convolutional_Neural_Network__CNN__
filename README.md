@@ -424,3 +424,5 @@ class FeatureAttention(tf.keras.layers.Layer):
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 
+# Do It yoursef to see the Magic
+## with my ready dataset you can try yourself
